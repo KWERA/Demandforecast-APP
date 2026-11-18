@@ -2,6 +2,8 @@
 
 DemandCast is a Django web app for forecasting monthly product demand. You upload a CSV of past sales. The app cleans the data, shows charts that explore it, and then trains three forecasting models (SARIMA, Prophet and XGBoost). It recommends the most accurate model and predicts sales for the next 6 months.
 
+📘 **New to the app?** Read the [User Manual](docs/USER_MANUAL.md) for step-by-step instructions on signing up, uploading data and reading forecasts.
+
 ## Features
 
 - **User accounts.** You can sign up, log in and log out. Each user sees only their own datasets.
