@@ -31,8 +31,8 @@ DemandCast is a Django web app for forecasting monthly product demand. You uploa
 ### 1. Clone the repository and create a virtual environment
 
 ```bash
-git clone <your-repo-url>
-cd <repo-folder>
+git clone https://github.com/KWERA/Demandforecast-APP.git
+cd Demandforecast-APP
 python3 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -135,3 +135,5 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```
 
 Uploaded files are saved in `media/datasets/`. That folder and the SQLite database are excluded from git.
+
+- By Stella Kwera 
