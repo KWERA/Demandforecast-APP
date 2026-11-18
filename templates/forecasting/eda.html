@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">{{ dataset.name }}: data exploration</h2>
+        <p class="text-muted mb-0">{{ report.start }} to {{ report.end }} ({{ report.months_after_cleaning }} months)</p>
+    </div>
+    <div>
+        <a href="{% url 'forecast' dataset.pk %}" class="btn btn-success">Forecast demand</a>
+        <a href="{% url 'dataset_detail' dataset.pk %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md">
+        <div class="card p-3 text-center">
+            <div class="text-muted small">Total sales</div>
+            <div class="fs-4 fw-bold">{{ stats.total }}</div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card p-3 text-center">
+            <div class="text-muted small">Monthly average</div>
+            <div class="fs-4 fw-bold">{{ stats.average }}</div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card p-3 text-center">
+            <div class="text-muted small">Growth (last 12 months)</div>
+            <div class="fs-4 fw-bold {% if stats.growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ stats.growth }}%
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card p-3 text-center">
+            <div class="text-muted small">Busiest month</div>
+            <div class="fs-4 fw-bold">{{ stats.best_month }}</div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card p-3 text-center">
+            <div class="text-muted small">Quietest month</div>
+            <div class="fs-4 fw-bold">{{ stats.worst_month }}</div>
+        </div>
+    </div>
+</div>
+
+{% if driver %}
+<div class="alert alert-info">
+    <strong>Key insight.</strong> Of the factors in your data, <strong>{{ driver.name }}</strong>
+    is most closely linked to sales (correlation {{ driver.value }}).
+    Sales tend to {{ driver.direction }} when {{ driver.name }} goes up.
+</div>
+{% endif %}
+
+<div class="card p-3 mb-4">{{ charts.trend|safe }}</div>
+<div class="card p-3 mb-4">{{ charts.seasonality|safe }}</div>
+<div class="card p-3 mb-4">{{ charts.decomposition|safe }}</div>
+{% if charts.correlation %}
+<div class="card p-3 mb-4">
+    {{ charts.correlation|safe }}
+    <p class="text-muted small mb-0">
+        Values near +1 mean two things rise together. Values near -1 mean one rises as the other falls.
+        Values near 0 mean little relationship.
+    </p>
+</div>
+{% endif %}
+{% endblock %}

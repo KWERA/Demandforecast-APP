@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ dataset.name }}: 6-month demand forecast</h2>
+    <a href="{% url 'dataset_detail' dataset.pk %}" class="btn btn-secondary">Back</a>
+</div>
+
+<form method="post" action="{% url 'run_forecast' dataset.pk %}" class="mb-4"
+      onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerText='Training models, please wait...';">
+    {% csrf_token %}
+    <button class="btn btn-success">
+        {% if runs %}Re-run forecast{% else %}Run forecast{% endif %}
+    </button>
+    <span class="text-muted small ms-2">Trains SARIMA, Prophet and XGBoost. Takes up to a minute.</span>
+</form>
+
+{% if best %}
+<div class="alert alert-success">
+    <strong>Recommended model: {{ best.model_name }}</strong>.
+    When tested on your last 6 known months, its predictions were off by about
+    {{ best.mape|floatformat:1 }}% on average ({{ best.accuracy }}% accuracy).
+</div>
+
+<div class="card p-3 mb-4">{{ forecast_chart|safe }}</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card p-3 h-100">
+            <h5>Forecast ({{ best.model_name }})</h5>
+            <table class="table table-sm">
+                <tr><th>Month</th><th class="text-end">Expected demand</th><th class="text-end">Likely range</th></tr>
+                {% for p in best_points %}
+                <tr>
+                    <td>{{ p.date|date:"F Y" }}</td>
+                    <td class="text-end fw-bold">{{ p.predicted|floatformat:0 }}</td>
+                    <td class="text-end text-muted">{{ p.lower|floatformat:0 }} to {{ p.upper|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <p class="small text-muted mb-2">The likely range covers about 8 in 10 outcomes.</p>
+            <a href="{% url 'download_forecast' dataset.pk %}" class="btn btn-outline-primary btn-sm">
+                Download forecast CSV (opens in Excel or Power BI)
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card p-3 h-100">
+            <h5>Model comparison</h5>
+            <table class="table table-sm">
+                <tr><th>Model</th><th class="text-end">MAE</th><th class="text-end">RMSE</th><th class="text-end">MAPE</th><th class="text-end">Accuracy</th></tr>
+                {% for r in runs %}
+                <tr {% if r.is_best %}class="table-success"{% endif %}>
+                    <td>{{ r.model_name }}{% if r.is_best %} &#9733;{% endif %}</td>
+                    {% if r.error %}
+                        <td colspan="4" class="text-danger small">Failed: {{ r.error|truncatechars:80 }}</td>
+                    {% else %}
+                        <td class="text-end">{{ r.mae|floatformat:0 }}</td>
+                        <td class="text-end">{{ r.rmse|floatformat:0 }}</td>
+                        <td class="text-end">{{ r.mape|floatformat:1 }}%</td>
+                        <td class="text-end">{{ r.accuracy }}%</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p class="small text-muted mb-0">
+                <strong>MAE</strong> is the average miss in units sold.
+                <strong>RMSE</strong> is similar but punishes big misses more.
+                <strong>MAPE</strong> is the average miss as a percentage. Lower is better for all three.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card p-3 mb-4">{{ test_chart|safe }}</div>
+
+{% if assumed %}
+<div class="card p-3 mb-4">
+    <h5>Assumptions used for future months</h5>
+    <p class="small text-muted">
+        Future values of your other factors are unknown, so the app assumes they stay at the average of
+        the last 3 months. Holidays use the usual count for each month.
+    </p>
+    <ul class="small mb-0">
+        {% for name, value in assumed.items %}
+            <li>{{ name }}: {{ value }}{% if name == 'holidays' %} (first forecast month){% endif %}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% elif runs %}
+<div class="alert alert-danger">All models failed. Check the model comparison details and try again.</div>
+{% else %}
+<div class="card p-4 text-center text-muted">
+    No forecast yet. Click <strong>Run forecast</strong> to train the models on your data.
+</div>
+{% endif %}
+{% endblock %}

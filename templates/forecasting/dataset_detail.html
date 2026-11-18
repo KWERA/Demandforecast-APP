@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ dataset.name }}</h2>
+<p class="text-muted">Data from {{ report.start }} to {{ report.end }}</p>
+
+<div class="card p-3 mb-4">
+    <h5>Cleaning report</h5>
+    <ul class="mb-0">
+        <li>Rows uploaded: {{ report.rows_uploaded }}</li>
+        <li>Duplicate rows removed: {{ report.duplicates_removed }}</li>
+        <li>Rows with bad dates removed: {{ report.bad_dates_removed }}</li>
+        <li>Missing months filled: {{ report.missing_months_filled }}</li>
+        <li>Missing values filled: {{ report.missing_values_filled }}</li>
+        <li><strong>Months ready for forecasting: {{ report.months_after_cleaning }}</strong></li>
+    </ul>
+</div>
+
+<div class="card p-3 mb-4">
+    <h5>Summary statistics</h5>
+    <div class="table-responsive">{{ stats_html|safe }}</div>
+</div>
+
+<div class="card p-3 mb-4">
+    <h5>Preview (first 12 months)</h5>
+    <div class="table-responsive">{{ preview_html|safe }}</div>
+</div>
+
+<a href="{% url 'dataset_eda' dataset.pk %}" class="btn btn-primary">Explore data (EDA)</a>
+<a href="{% url 'forecast' dataset.pk %}" class="btn btn-success">Forecast demand</a>
+<a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+{% endblock %}

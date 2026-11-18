@@ -1,0 +1,14 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card p-4 mx-auto" style="max-width: 600px">
+  <h3>Upload sales data</h3>
+  <p class="text-muted">
+    CSV must include <code>date</code> and <code>sales</code> columns, with at
+    least 24 months of data. Optional columns: marketing_spend, holidays, price,
+    discount, inflation, gdp, exchange_rate.
+  </p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %} {{ form.as_p }}
+    <button class="btn btn-primary">Upload and check</button>
+  </form>
+</div>
+{% endblock %}
